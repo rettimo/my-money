@@ -6,7 +6,7 @@ import { Secret } from 'components/Secret'
 import { DateBar } from 'components/DateBar'
 import { Balance } from 'components/Balance'
 import { TimeLine } from 'components/TimeLine'
-import { Buttons } from 'components/Buttons'
+import { Modal } from 'components/Modal'
 
 const Index: NextPage = () => {
   const [start, setStart] = useState<boolean>(true)
@@ -26,8 +26,7 @@ const Index: NextPage = () => {
   return (
     <Layout>
       <Balance />
-      <DateBar />
-      <Buttons />
+      <Modal />
       <TimeLine />
     </Layout>
   )

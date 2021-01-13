@@ -2,15 +2,8 @@ import 'date-fns'
 import Grid from '@material-ui/core/Grid'
 import DateFnsUtils from '@date-io/date-fns'
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers'
-import { useState } from 'react'
 
-export const DateBar = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date())
-
-  const handleDateChange = date => {
-    setSelectedDate(date)
-  }
-
+export const DateBar = ({ changeDate, currentDate }) => {
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <Grid container justify="space-around">
@@ -20,8 +13,8 @@ export const DateBar = () => {
           format="dd/MM/yyyy"
           margin="normal"
           label="Текущая дата"
-          value={selectedDate}
-          onChange={handleDateChange}
+          value={currentDate}
+          onChange={changeDate}
           KeyboardButtonProps={{
             'aria-label': 'change date',
           }}

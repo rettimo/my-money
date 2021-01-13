@@ -28,10 +28,18 @@ const useStyles = makeStyles({
     minWidth: 0,
     padding: 0,
   },
+  notFound: {
+    padding: '25px 0',
+    textAlign: 'center',
+  },
 })
 
 export const TimeLine: FC = () => {
   const classes = useStyles()
+
+  if (actions.length === 0) {
+    return <Typography className={classes.notFound}>Записей не найдено</Typography>
+  }
 
   return (
     <>

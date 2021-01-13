@@ -1,6 +1,7 @@
 {
-  "name": "nextjs-template",
+  "name": "my-money",
   "version": "1.0.0",
+  "license": "MIT",
   "scripts": {
     "dev": "next",
     "build": "next build",

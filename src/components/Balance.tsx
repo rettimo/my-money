@@ -2,9 +2,10 @@ import { FC } from 'react'
 import { accounts } from 'mock/data'
 
 import { Paper, makeStyles, Typography, Box } from '@material-ui/core'
-import { AccountBalance, CreditCard, AccountBalanceWallet, AttachMoney } from '@material-ui/icons'
+import { AccountBalance, CreditCard } from '@material-ui/icons'
 import { moneyView } from 'utils/moneyView'
 import { Amount } from './Amount'
+import { Icon } from './Icon'
 
 const useStyles = makeStyles({
   paper: {
@@ -25,7 +26,7 @@ export const Balance: FC = () => {
       <Paper className={classes.paper}>
         <Box className={classes.account}>
           <Box>
-            <AccountBalance />
+            <Icon icon={24} />
             <Typography variant="subtitle1" color="textSecondary">
               Баланс
             </Typography>
@@ -33,25 +34,30 @@ export const Balance: FC = () => {
           <Typography variant="h5">
             <Amount
               value={accounts.reduce((a, v) => {
-                return a + v.amount
+                return v.currencyId === 0 ? a + v.amount : a
               }, 0)}
             />
           </Typography>
         </Box>
       </Paper>
-      {accounts.map(acc => (
-        <Paper className={classes.paper}>
-          <Box className={classes.account}>
-            <Box>
-              <CreditCard />
-              <Typography variant="subtitle1" color="textSecondary">
-                {acc.name}
-              </Typography>
-            </Box>
-            <Typography variant="h5">{moneyView(acc.amount)}</Typography>
-          </Box>
-        </Paper>
-      ))}
+      {accounts.map(
+        acc =>
+          acc.visible && (
+            <Paper className={classes.paper} key={acc.id}>
+              <Box className={classes.account}>
+                <Box>
+                  <Icon icon={acc.iconId} />
+                  <Typography variant="subtitle1" color="textSecondary">
+                    {acc.name}
+                  </Typography>
+                </Box>
+                <Typography variant="h5">
+                  <Amount value={acc.amount} currency={acc.currencyId} />
+                </Typography>
+              </Box>
+            </Paper>
+          ),
+      )}
     </>
   )
 }
