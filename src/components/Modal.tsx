@@ -1,6 +1,6 @@
 import { FC, useState, ChangeEvent } from 'react'
 import { categoryIds } from 'constants/index'
-import { accounts } from 'mock/data'
+import { useAccountsQuery } from 'generated/graphql'
 
 import {
   ButtonGroup,
@@ -15,6 +15,7 @@ import {
   Typography,
   Box,
 } from '@material-ui/core'
+import { Skeleton } from '@material-ui/lab'
 import { DateBar } from './DateBar'
 import { Icon } from './Icon'
 import { Amount } from './Amount'
@@ -43,9 +44,14 @@ const useStyles = makeStyles({
     display: 'flex',
     alignItems: 'center',
   },
+  sceleton: {
+    marginBottom: 10,
+  },
 })
 
 export const Modal: FC = () => {
+  const { data, loading } = useAccountsQuery({ variables: { visible: true } })
+
   const classes = useStyles()
   const [open, setOpen] = useState<boolean>(false)
 
@@ -89,20 +95,30 @@ export const Modal: FC = () => {
     setDesc(event.target.value)
   }
 
-  const handleAddNote = () => {
+  const handleAddNote = async () => {
     const note = {
       type,
       amount: Number(amount),
-      accountId: Number(account),
-      categoryId: Number(category),
+      accountId: account,
+      categoryId: category,
       desc,
       createAt: selectedDate,
     }
 
-    console.log(note)
-
     setOpen(false)
   }
+
+  if (loading) {
+    return (
+      <>
+        <Skeleton className={classes.sceleton} variant="rect" width="100%" height={20} />
+        <Skeleton className={classes.sceleton} variant="rect" width="100%" height={40} />
+        <Skeleton className={classes.sceleton} variant="rect" width="100%" height={100} />
+      </>
+    )
+  }
+
+  const { accounts } = data
 
   return (
     <>
@@ -137,12 +153,12 @@ export const Modal: FC = () => {
             {accounts.map(
               option =>
                 option.visible && (
-                  <MenuItem key={option.id} value={option.id}>
+                  <MenuItem key={option._id} value={option._id}>
                     <Box className={classes.menuItem}>
-                      <Icon icon={option.iconId} />
+                      <Icon icon={option.iconID} />
                       <Typography>{option.name}</Typography>
                       <Box className={classes.amount}>
-                        <Amount value={option.amount} />
+                        <Amount value={option.amount} currency={option.currency.icon} />
                       </Box>
                     </Box>
                   </MenuItem>

@@ -1,0 +1,13 @@
+mutation account($acc: AccountInput!) {
+  account(acc: $acc) {
+    _id
+    name
+    iconID
+    amount
+    visible
+    currency {
+      _id
+      icon
+    }
+  }
+}

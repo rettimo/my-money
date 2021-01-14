@@ -3,7 +3,6 @@ import { useState } from 'react'
 
 import { Layout } from 'components/Layout'
 import { Secret } from 'components/Secret'
-import { DateBar } from 'components/DateBar'
 import { Balance } from 'components/Balance'
 import { TimeLine } from 'components/TimeLine'
 import { Modal } from 'components/Modal'

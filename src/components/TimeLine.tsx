@@ -1,5 +1,4 @@
 import { FC } from 'react'
-import { actions } from 'mock/data'
 
 import {
   Timeline as MIUTimeLine,
@@ -36,6 +35,8 @@ const useStyles = makeStyles({
 
 export const TimeLine: FC = () => {
   const classes = useStyles()
+
+  const actions = []
 
   if (actions.length === 0) {
     return <Typography className={classes.notFound}>Записей не найдено</Typography>

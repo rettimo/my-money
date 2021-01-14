@@ -1,0 +1,13 @@
+query accounts($visible: Boolean!) {
+  accounts(visible: $visible) {
+    _id
+    name
+    iconID
+    amount
+    visible
+    currency {
+      _id
+      icon
+    }
+  }
+}

@@ -1,0 +1,22 @@
+overwrite: true
+schema: 'http://localhost:3000/api/graphql'
+documents: 'src/graphql/**/*.graphql'
+
+generates:
+  src/generated/graphql.ts:
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-react-apollo'
+      - 'typescript-resolvers'
+    hooks:
+      afterOneFileWrite:
+        - prettier --write
+    config:
+      interfacePrefix: 'I'
+      typesPrefix: 'I'
+      useIndexSignature: true
+      skipTypename: true
+      noNamespaces: true

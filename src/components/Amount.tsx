@@ -1,7 +1,6 @@
 import { makeStyles, Typography } from '@material-ui/core'
 import { FC } from 'react'
 import { moneyView } from 'utils/moneyView'
-import { currencyIds } from 'constants/index'
 
 const useStyles = makeStyles({
   textGreen: {
@@ -12,9 +11,9 @@ const useStyles = makeStyles({
   },
 })
 
-export const Amount: FC<{ value: number; currency?: number }> = ({
+export const Amount: FC<{ value: number; currency?: string }> = ({
   value,
-  currency = 0,
+  currency = '',
 }): JSX.Element => {
   const classes = useStyles()
   return (
@@ -23,7 +22,7 @@ export const Amount: FC<{ value: number; currency?: number }> = ({
       component="span"
       className={value > 0 ? classes.textGreen : classes.textRed}
     >
-      {moneyView(value, currencyIds[currency].icon)}
+      {moneyView(value, currency)}
     </Typography>
   )
 }

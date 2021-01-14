@@ -3,8 +3,12 @@
 import CssBaseline from '@material-ui/core/CssBaseline'
 import { useEffect } from 'react'
 import { AppProps } from 'next/app'
+import { ApolloProvider } from '@apollo/client'
+import { useApollo } from 'utils/apolloClient'
 
 const MyApp = ({ Component, pageProps }: AppProps) => {
+  const apolloClient = useApollo(pageProps.initialApolloState)
+
   useEffect(() => {
     const jssStyles = document.querySelector('#jss-server-side')
     if (jssStyles) {
@@ -13,10 +17,10 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
   }, [])
 
   return (
-    <>
+    <ApolloProvider client={apolloClient}>
       <CssBaseline />
       <Component {...pageProps} />
-    </>
+    </ApolloProvider>
   )
 }
 
