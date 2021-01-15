@@ -1,4 +1,4 @@
-query accounts($visible: Boolean!) {
+query accounts($visible: Boolean) {
   accounts(visible: $visible) {
     _id
     name
@@ -7,6 +7,7 @@ query accounts($visible: Boolean!) {
     visible
     currency {
       _id
+      name
       icon
     }
   }

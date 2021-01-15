@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable no-param-reassign */
 /* eslint-disable global-require */
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { useMemo } from 'react'
@@ -22,7 +24,9 @@ function createApolloClient() {
   return new ApolloClient({
     ssrMode: typeof window === 'undefined',
     link: createIsomorphLink(),
-    cache: new InMemoryCache(),
+    cache: new InMemoryCache({
+      addTypename: false,
+    }),
   })
 }
 

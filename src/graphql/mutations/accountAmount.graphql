@@ -1,0 +1,6 @@
+mutation accountAcount($id: String!, $amount: Int!, $type: Int!) {
+  accountAmount(_id: $id, amount: $amount, type: $type) {
+    name
+    amount
+  }
+}

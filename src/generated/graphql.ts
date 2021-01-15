@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { GraphQLResolveInfo } from 'graphql'
+import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql'
 import { gql } from '@apollo/client'
 import * as Apollo from '@apollo/client'
 export type Maybe<T> = T | null
@@ -15,6 +15,8 @@ export type Scalars = {
   Boolean: boolean
   Int: number
   Float: number
+  /** Date custom scalar type */
+  Date: any
 }
 
 export type ICurrency = {
@@ -32,12 +34,34 @@ export type IAccount = {
   visible: Scalars['Boolean']
 }
 
-export type IQuery = {
-  accounts: Array<Maybe<IAccount>>
+export type ICategory = {
+  _id: Scalars['Int']
+  name: Scalars['String']
+  type: Scalars['Int']
 }
 
-export type IQueryAccountsArgs = {
-  visible?: Maybe<Scalars['Boolean']>
+export type INote = {
+  type: Scalars['Int']
+  amount: Scalars['Int']
+  account: IAccount
+  category: ICategory
+  desc?: Maybe<Scalars['String']>
+  createAt: Scalars['Date']
+}
+
+export type IAccountInput = {
+  _id: Scalars['ID']
+  name: Scalars['String']
+  amount: Scalars['Int']
+  currency: ICurrencyInput
+  iconID: Scalars['Int']
+  visible: Scalars['Boolean']
+}
+
+export type ICategoryInput = {
+  _id: Scalars['Int']
+  name: Scalars['String']
+  type: Scalars['Int']
 }
 
 export type ICurrencyInput = {
@@ -46,38 +70,167 @@ export type ICurrencyInput = {
   icon: Scalars['String']
 }
 
-export type IAccountInput = {
-  name: Scalars['String']
+export type INoteInput = {
+  type: Scalars['Int']
   amount: Scalars['Int']
-  iconID: Scalars['String']
-  currency?: Maybe<ICurrencyInput>
-  visible: Scalars['Boolean']
+  account: IAccountInput
+  category: ICategoryInput
+  desc?: Maybe<Scalars['String']>
+  createAt: Scalars['Date']
+}
+
+export type IQuery = {
+  accounts: Array<Maybe<IAccount>>
+  categories: Array<Maybe<ICategory>>
+  notes: Array<Maybe<INote>>
+}
+
+export type IQueryAccountsArgs = {
+  visible?: Maybe<Scalars['Boolean']>
+}
+
+export type IQueryCategoriesArgs = {
+  type: Scalars['Int']
+}
+
+export type IQueryNotesArgs = {
+  date: Scalars['Int']
 }
 
 export type IMutation = {
-  account: IAccount
+  note: INote
+  accountAmount: IAccount
 }
 
-export type IMutationAccountArgs = {
-  acc: IAccountInput
+export type IMutationNoteArgs = {
+  input: INoteInput
 }
+
+export type IMutationAccountAmountArgs = {
+  _id: Scalars['String']
+  amount: Scalars['Int']
+  type: Scalars['Int']
+}
+
+export type IAccountAcountMutationVariables = Exact<{
+  id: Scalars['String']
+  amount: Scalars['Int']
+  type: Scalars['Int']
+}>
+
+export type IAccountAcountMutation = { accountAmount: Pick<IAccount, 'name' | 'amount'> }
+
+export type INoteMutationVariables = Exact<{
+  input: INoteInput
+}>
+
+export type INoteMutation = { note: Pick<INote, 'type' | 'amount'> }
 
 export type IAccountsQueryVariables = Exact<{
-  visible: Scalars['Boolean']
+  visible?: Maybe<Scalars['Boolean']>
 }>
 
 export type IAccountsQuery = {
   accounts: Array<
     Maybe<
       Pick<IAccount, '_id' | 'name' | 'iconID' | 'amount' | 'visible'> & {
-        currency: Pick<ICurrency, '_id' | 'icon'>
+        currency: Pick<ICurrency, '_id' | 'name' | 'icon'>
       }
     >
   >
 }
 
+export type ICategoriesQueryVariables = Exact<{
+  type: Scalars['Int']
+}>
+
+export type ICategoriesQuery = {
+  categories: Array<Maybe<Pick<ICategory, '_id' | 'name' | 'type'>>>
+}
+
+export const AccountAcountDocument = gql`
+  mutation accountAcount($id: String!, $amount: Int!, $type: Int!) {
+    accountAmount(_id: $id, amount: $amount, type: $type) {
+      name
+      amount
+    }
+  }
+`
+export type IAccountAcountMutationFn = Apollo.MutationFunction<
+  IAccountAcountMutation,
+  IAccountAcountMutationVariables
+>
+
+/**
+ * __useAccountAcountMutation__
+ *
+ * To run a mutation, you first call `useAccountAcountMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAccountAcountMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [accountAcountMutation, { data, loading, error }] = useAccountAcountMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      amount: // value for 'amount'
+ *      type: // value for 'type'
+ *   },
+ * });
+ */
+export function useAccountAcountMutation(
+  baseOptions?: Apollo.MutationHookOptions<IAccountAcountMutation, IAccountAcountMutationVariables>,
+) {
+  return Apollo.useMutation<IAccountAcountMutation, IAccountAcountMutationVariables>(
+    AccountAcountDocument,
+    baseOptions,
+  )
+}
+export type AccountAcountMutationHookResult = ReturnType<typeof useAccountAcountMutation>
+export type AccountAcountMutationResult = Apollo.MutationResult<IAccountAcountMutation>
+export type AccountAcountMutationOptions = Apollo.BaseMutationOptions<
+  IAccountAcountMutation,
+  IAccountAcountMutationVariables
+>
+export const NoteDocument = gql`
+  mutation note($input: NoteInput!) {
+    note(input: $input) {
+      type
+      amount
+    }
+  }
+`
+export type INoteMutationFn = Apollo.MutationFunction<INoteMutation, INoteMutationVariables>
+
+/**
+ * __useNoteMutation__
+ *
+ * To run a mutation, you first call `useNoteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useNoteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [noteMutation, { data, loading, error }] = useNoteMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useNoteMutation(
+  baseOptions?: Apollo.MutationHookOptions<INoteMutation, INoteMutationVariables>,
+) {
+  return Apollo.useMutation<INoteMutation, INoteMutationVariables>(NoteDocument, baseOptions)
+}
+export type NoteMutationHookResult = ReturnType<typeof useNoteMutation>
+export type NoteMutationResult = Apollo.MutationResult<INoteMutation>
+export type NoteMutationOptions = Apollo.BaseMutationOptions<INoteMutation, INoteMutationVariables>
 export const AccountsDocument = gql`
-  query accounts($visible: Boolean!) {
+  query accounts($visible: Boolean) {
     accounts(visible: $visible) {
       _id
       name
@@ -86,6 +239,7 @@ export const AccountsDocument = gql`
       visible
       currency {
         _id
+        name
         icon
       }
     }
@@ -109,7 +263,7 @@ export const AccountsDocument = gql`
  * });
  */
 export function useAccountsQuery(
-  baseOptions: Apollo.QueryHookOptions<IAccountsQuery, IAccountsQueryVariables>,
+  baseOptions?: Apollo.QueryHookOptions<IAccountsQuery, IAccountsQueryVariables>,
 ) {
   return Apollo.useQuery<IAccountsQuery, IAccountsQueryVariables>(AccountsDocument, baseOptions)
 }
@@ -121,6 +275,51 @@ export function useAccountsLazyQuery(
 export type AccountsQueryHookResult = ReturnType<typeof useAccountsQuery>
 export type AccountsLazyQueryHookResult = ReturnType<typeof useAccountsLazyQuery>
 export type AccountsQueryResult = Apollo.QueryResult<IAccountsQuery, IAccountsQueryVariables>
+export const CategoriesDocument = gql`
+  query categories($type: Int!) {
+    categories(type: $type) {
+      _id
+      name
+      type
+    }
+  }
+`
+
+/**
+ * __useCategoriesQuery__
+ *
+ * To run a query within a React component, call `useCategoriesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCategoriesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCategoriesQuery({
+ *   variables: {
+ *      type: // value for 'type'
+ *   },
+ * });
+ */
+export function useCategoriesQuery(
+  baseOptions: Apollo.QueryHookOptions<ICategoriesQuery, ICategoriesQueryVariables>,
+) {
+  return Apollo.useQuery<ICategoriesQuery, ICategoriesQueryVariables>(
+    CategoriesDocument,
+    baseOptions,
+  )
+}
+export function useCategoriesLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<ICategoriesQuery, ICategoriesQueryVariables>,
+) {
+  return Apollo.useLazyQuery<ICategoriesQuery, ICategoriesQueryVariables>(
+    CategoriesDocument,
+    baseOptions,
+  )
+}
+export type CategoriesQueryHookResult = ReturnType<typeof useCategoriesQuery>
+export type CategoriesLazyQueryHookResult = ReturnType<typeof useCategoriesLazyQuery>
+export type CategoriesQueryResult = Apollo.QueryResult<ICategoriesQuery, ICategoriesQueryVariables>
 export type WithIndex<TObject> = TObject & Record<string, any>
 export type ResolversObject<TObject> = WithIndex<TObject>
 
@@ -217,31 +416,45 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type IResolversTypes = ResolversObject<{
+  Date: ResolverTypeWrapper<Scalars['Date']>
   Currency: ResolverTypeWrapper<ICurrency>
   Int: ResolverTypeWrapper<Scalars['Int']>
   String: ResolverTypeWrapper<Scalars['String']>
   Account: ResolverTypeWrapper<IAccount>
   ID: ResolverTypeWrapper<Scalars['ID']>
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>
-  Query: ResolverTypeWrapper<{}>
-  CurrencyInput: ICurrencyInput
+  Category: ResolverTypeWrapper<ICategory>
+  Note: ResolverTypeWrapper<INote>
   AccountInput: IAccountInput
+  CategoryInput: ICategoryInput
+  CurrencyInput: ICurrencyInput
+  NoteInput: INoteInput
+  Query: ResolverTypeWrapper<{}>
   Mutation: ResolverTypeWrapper<{}>
 }>
 
 /** Mapping between all available schema types and the resolvers parents */
 export type IResolversParentTypes = ResolversObject<{
+  Date: Scalars['Date']
   Currency: ICurrency
   Int: Scalars['Int']
   String: Scalars['String']
   Account: IAccount
   ID: Scalars['ID']
   Boolean: Scalars['Boolean']
-  Query: {}
-  CurrencyInput: ICurrencyInput
+  Category: ICategory
+  Note: INote
   AccountInput: IAccountInput
+  CategoryInput: ICategoryInput
+  CurrencyInput: ICurrencyInput
+  NoteInput: INoteInput
+  Query: {}
   Mutation: {}
 }>
+
+export interface IDateScalarConfig extends GraphQLScalarTypeConfig<IResolversTypes['Date'], any> {
+  name: 'Date'
+}
 
 export type ICurrencyResolvers<
   ContextType = any,
@@ -266,6 +479,29 @@ export type IAccountResolvers<
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
 }>
 
+export type ICategoryResolvers<
+  ContextType = any,
+  ParentType extends IResolversParentTypes['Category'] = IResolversParentTypes['Category']
+> = ResolversObject<{
+  _id?: Resolver<IResolversTypes['Int'], ParentType, ContextType>
+  name?: Resolver<IResolversTypes['String'], ParentType, ContextType>
+  type?: Resolver<IResolversTypes['Int'], ParentType, ContextType>
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
+}>
+
+export type INoteResolvers<
+  ContextType = any,
+  ParentType extends IResolversParentTypes['Note'] = IResolversParentTypes['Note']
+> = ResolversObject<{
+  type?: Resolver<IResolversTypes['Int'], ParentType, ContextType>
+  amount?: Resolver<IResolversTypes['Int'], ParentType, ContextType>
+  account?: Resolver<IResolversTypes['Account'], ParentType, ContextType>
+  category?: Resolver<IResolversTypes['Category'], ParentType, ContextType>
+  desc?: Resolver<Maybe<IResolversTypes['String']>, ParentType, ContextType>
+  createAt?: Resolver<IResolversTypes['Date'], ParentType, ContextType>
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>
+}>
+
 export type IQueryResolvers<
   ContextType = any,
   ParentType extends IResolversParentTypes['Query'] = IResolversParentTypes['Query']
@@ -276,23 +512,44 @@ export type IQueryResolvers<
     ContextType,
     RequireFields<IQueryAccountsArgs, never>
   >
+  categories?: Resolver<
+    Array<Maybe<IResolversTypes['Category']>>,
+    ParentType,
+    ContextType,
+    RequireFields<IQueryCategoriesArgs, 'type'>
+  >
+  notes?: Resolver<
+    Array<Maybe<IResolversTypes['Note']>>,
+    ParentType,
+    ContextType,
+    RequireFields<IQueryNotesArgs, 'date'>
+  >
 }>
 
 export type IMutationResolvers<
   ContextType = any,
   ParentType extends IResolversParentTypes['Mutation'] = IResolversParentTypes['Mutation']
 > = ResolversObject<{
-  account?: Resolver<
+  note?: Resolver<
+    IResolversTypes['Note'],
+    ParentType,
+    ContextType,
+    RequireFields<IMutationNoteArgs, 'input'>
+  >
+  accountAmount?: Resolver<
     IResolversTypes['Account'],
     ParentType,
     ContextType,
-    RequireFields<IMutationAccountArgs, 'acc'>
+    RequireFields<IMutationAccountAmountArgs, '_id' | 'amount' | 'type'>
   >
 }>
 
 export type IResolvers<ContextType = any> = ResolversObject<{
+  Date?: GraphQLScalarType
   Currency?: ICurrencyResolvers<ContextType>
   Account?: IAccountResolvers<ContextType>
+  Category?: ICategoryResolvers<ContextType>
+  Note?: INoteResolvers<ContextType>
   Query?: IQueryResolvers<ContextType>
   Mutation?: IMutationResolvers<ContextType>
 }>

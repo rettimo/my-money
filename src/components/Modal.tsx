@@ -1,6 +1,11 @@
 import { FC, useState, ChangeEvent } from 'react'
-import { categoryIds } from 'constants/index'
-import { useAccountsQuery } from 'generated/graphql'
+import {
+  useAccountsQuery,
+  useCategoriesLazyQuery,
+  useNoteMutation,
+  useAccountAcountMutation,
+  AccountsDocument,
+} from 'generated/graphql'
 
 import {
   ButtonGroup,
@@ -51,6 +56,9 @@ const useStyles = makeStyles({
 
 export const Modal: FC = () => {
   const { data, loading } = useAccountsQuery({ variables: { visible: true } })
+  const [getCategories, { data: categoriesData }] = useCategoriesLazyQuery()
+  const [createNote] = useNoteMutation()
+  const [updateAccount] = useAccountAcountMutation()
 
   const classes = useStyles()
   const [open, setOpen] = useState<boolean>(false)
@@ -67,6 +75,7 @@ export const Modal: FC = () => {
   }
 
   const handleClickOpen = (_type: number) => {
+    getCategories({ variables: { type: _type } })
     setOpen(true)
     setType(_type)
     setAmount('')
@@ -96,14 +105,33 @@ export const Modal: FC = () => {
   }
 
   const handleAddNote = async () => {
+    const [_account] = data.accounts.filter(acc => acc._id === account)
+    const [_category] = categoriesData.categories.filter(categry => categry._id === +category)
+
     const note = {
       type,
       amount: Number(amount),
-      accountId: account,
-      categoryId: category,
+      account: _account,
+      category: _category,
       desc,
-      createAt: selectedDate,
+      createAt: selectedDate.toISOString(),
     }
+
+    createNote({ variables: { input: note } })
+
+    updateAccount({
+      variables: {
+        id: _account._id,
+        amount: +amount,
+        type,
+      },
+      refetchQueries: [
+        {
+          query: AccountsDocument,
+          variables: { visible: true },
+        },
+      ],
+    })
 
     setOpen(false)
   }
@@ -173,16 +201,17 @@ export const Modal: FC = () => {
             onChange={handleChangeCategory}
             fullWidth
           >
-            {categoryIds.map(
-              option =>
-                type === option.typeId && (
-                  <MenuItem key={option.id} value={option.id}>
-                    <Box className={classes.menuItem}>
-                      <Icon icon={option.id} />
-                      {option.name}
-                    </Box>
-                  </MenuItem>
-                ),
+            {categoriesData ? (
+              categoriesData.categories.map(option => (
+                <MenuItem key={option._id} value={option._id}>
+                  <Box className={classes.menuItem}>
+                    <Icon icon={option._id} />
+                    {option.name}
+                  </Box>
+                </MenuItem>
+              ))
+            ) : (
+              <Skeleton className={classes.sceleton} variant="rect" width="100%" height={20} />
             )}
           </TextField>
           <TextField

@@ -1,46 +1,31 @@
 import { Schema, model, models } from 'mongoose'
-import Account from './Account'
-
-const TypeSchema = new Schema({
-  id: {
-    type: Number,
-  },
-  name: {
-    type: String,
-  },
-})
-
-const CategorySchema = new Schema({
-  id: {
-    type: Number,
-  },
-  name: {
-    type: String,
-  },
-  typeID: {
-    type: TypeSchema,
-  },
-})
+import { AccountSchema } from './Account'
+import { CategorySchema } from './Category'
 
 const NoteSchema = new Schema({
-  typeID: {
-    type: TypeSchema,
+  type: {
+    type: Number,
     required: true,
   },
   amount: {
     type: Number,
     required: true,
   },
-  accountID: {
-    type: Account,
+  account: {
+    type: AccountSchema,
     required: true,
   },
-  categoryID: {
+  category: {
     type: CategorySchema,
     required: true,
   },
   desc: {
     type: String,
+  },
+  createAt: {
+    type: Date,
+    default: Date.now,
+    required: true,
   },
 })
 

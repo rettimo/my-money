@@ -1,0 +1,7 @@
+query categories($type: Int!) {
+  categories(type: $type) {
+    _id
+    name
+    type
+  }
+}

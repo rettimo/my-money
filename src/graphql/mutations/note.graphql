@@ -1,0 +1,6 @@
+mutation note($input: NoteInput!) {
+  note(input: $input) {
+    type
+    amount
+  }
+}

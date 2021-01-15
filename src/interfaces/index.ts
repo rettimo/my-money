@@ -1,5 +1,11 @@
 import { Model, Document } from 'mongoose'
 
+export interface ICategory {
+  _id: string
+  name: string
+  icon: number
+}
+
 export interface IAccount {
   _id: string
   name: string
@@ -13,9 +19,11 @@ export interface IAccount {
   visible: boolean
 }
 
-export type AccountDocument = IAccount & Document
+export type AccountModel = Model<IAccount & Document>
 
-export type AccountModel = Model<AccountDocument>
+export type CategoryDocument = ICategory & Document
+
+export type CategoryModel = Model<CategoryDocument>
 
 export interface IAddNote {
   type: number
