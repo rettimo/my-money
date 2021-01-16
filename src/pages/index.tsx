@@ -3,9 +3,7 @@ import { useState } from 'react'
 
 import { Layout } from 'components/Layout'
 import { Secret } from 'components/Secret'
-import { Balance } from 'components/Balance'
-import { TimeLine } from 'components/TimeLine'
-import { Modal } from 'components/Modal'
+import { Board } from 'components/Board'
 
 const Index: NextPage = () => {
   const [start, setStart] = useState<boolean>(true)
@@ -24,9 +22,7 @@ const Index: NextPage = () => {
 
   return (
     <Layout>
-      <Balance />
-      <Modal />
-      <TimeLine />
+      <Board />
     </Layout>
   )
 }

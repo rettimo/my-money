@@ -41,6 +41,7 @@ export type ICategory = {
 }
 
 export type INote = {
+  _id: Scalars['ID']
   type: Scalars['Int']
   amount: Scalars['Int']
   account: IAccount
@@ -94,7 +95,7 @@ export type IQueryCategoriesArgs = {
 }
 
 export type IQueryNotesArgs = {
-  date: Scalars['Int']
+  date: Scalars['Date']
 }
 
 export type IMutation = {
@@ -146,6 +147,21 @@ export type ICategoriesQueryVariables = Exact<{
 
 export type ICategoriesQuery = {
   categories: Array<Maybe<Pick<ICategory, '_id' | 'name' | 'type'>>>
+}
+
+export type INotesQueryVariables = Exact<{
+  date: Scalars['Date']
+}>
+
+export type INotesQuery = {
+  notes: Array<
+    Maybe<
+      Pick<INote, '_id' | 'type' | 'amount' | 'createAt' | 'desc'> & {
+        account: Pick<IAccount, 'name'> & { currency: Pick<ICurrency, 'icon'> }
+        category: Pick<ICategory, 'name' | '_id'>
+      }
+    >
+  >
 }
 
 export const AccountAcountDocument = gql`
@@ -320,6 +336,57 @@ export function useCategoriesLazyQuery(
 export type CategoriesQueryHookResult = ReturnType<typeof useCategoriesQuery>
 export type CategoriesLazyQueryHookResult = ReturnType<typeof useCategoriesLazyQuery>
 export type CategoriesQueryResult = Apollo.QueryResult<ICategoriesQuery, ICategoriesQueryVariables>
+export const NotesDocument = gql`
+  query notes($date: Date!) {
+    notes(date: $date) {
+      _id
+      type
+      amount
+      createAt
+      account {
+        name
+        currency {
+          icon
+        }
+      }
+      category {
+        name
+        _id
+      }
+      desc
+    }
+  }
+`
+
+/**
+ * __useNotesQuery__
+ *
+ * To run a query within a React component, call `useNotesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNotesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNotesQuery({
+ *   variables: {
+ *      date: // value for 'date'
+ *   },
+ * });
+ */
+export function useNotesQuery(
+  baseOptions: Apollo.QueryHookOptions<INotesQuery, INotesQueryVariables>,
+) {
+  return Apollo.useQuery<INotesQuery, INotesQueryVariables>(NotesDocument, baseOptions)
+}
+export function useNotesLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<INotesQuery, INotesQueryVariables>,
+) {
+  return Apollo.useLazyQuery<INotesQuery, INotesQueryVariables>(NotesDocument, baseOptions)
+}
+export type NotesQueryHookResult = ReturnType<typeof useNotesQuery>
+export type NotesLazyQueryHookResult = ReturnType<typeof useNotesLazyQuery>
+export type NotesQueryResult = Apollo.QueryResult<INotesQuery, INotesQueryVariables>
 export type WithIndex<TObject> = TObject & Record<string, any>
 export type ResolversObject<TObject> = WithIndex<TObject>
 
@@ -493,6 +560,7 @@ export type INoteResolvers<
   ContextType = any,
   ParentType extends IResolversParentTypes['Note'] = IResolversParentTypes['Note']
 > = ResolversObject<{
+  _id?: Resolver<IResolversTypes['ID'], ParentType, ContextType>
   type?: Resolver<IResolversTypes['Int'], ParentType, ContextType>
   amount?: Resolver<IResolversTypes['Int'], ParentType, ContextType>
   account?: Resolver<IResolversTypes['Account'], ParentType, ContextType>

@@ -1,11 +1,6 @@
 import { FC, useState, ChangeEvent } from 'react'
-import {
-  useAccountsQuery,
-  useCategoriesLazyQuery,
-  useNoteMutation,
-  useAccountAcountMutation,
-  AccountsDocument,
-} from 'generated/graphql'
+import { getDateTime } from 'utils/dateHelpers'
+import { Exact, IAccount, ICategory, INote } from 'generated/graphql'
 
 import {
   ButtonGroup,
@@ -21,7 +16,7 @@ import {
   Box,
 } from '@material-ui/core'
 import { Skeleton } from '@material-ui/lab'
-import { DateBar } from './DateBar'
+import { QueryLazyOptions } from '@apollo/client'
 import { Icon } from './Icon'
 import { Amount } from './Amount'
 
@@ -52,14 +47,28 @@ const useStyles = makeStyles({
   sceleton: {
     marginBottom: 10,
   },
+  icon: {
+    marginRight: 10,
+  },
 })
 
-export const Modal: FC = () => {
-  const { data, loading } = useAccountsQuery({ variables: { visible: true } })
-  const [getCategories, { data: categoriesData }] = useCategoriesLazyQuery()
-  const [createNote] = useNoteMutation()
-  const [updateAccount] = useAccountAcountMutation()
+interface Props {
+  accounts: { accounts: IAccount[] }
+  categories: { categories: ICategory[] }
+  getCategories: (
+    options?: QueryLazyOptions<
+      Exact<{
+        type: number
+      }>
+    >,
+  ) => void
+  createNote: (
+    note: Pick<INote, 'account' | 'amount' | 'category' | 'createAt' | 'desc' | 'type'>,
+  ) => void
+  date: Date
+}
 
+export const Modal: FC<Props> = ({ accounts, categories, getCategories, createNote, date }) => {
   const classes = useStyles()
   const [open, setOpen] = useState<boolean>(false)
 
@@ -68,16 +77,11 @@ export const Modal: FC = () => {
   const [account, setAccount] = useState<string>()
   const [category, setCategory] = useState<string>()
   const [desc, setDesc] = useState<string>('')
-  const [selectedDate, setSelectedDate] = useState(new Date())
 
-  const handleDateChange = date => {
-    setSelectedDate(date)
-  }
-
-  const handleClickOpen = (_type: number) => {
-    getCategories({ variables: { type: _type } })
+  const handleClickOpen = (t: number) => {
+    getCategories({ variables: { type: t } })
     setOpen(true)
-    setType(_type)
+    setType(t)
     setAmount('')
     setAccount('')
     setDesc('')
@@ -88,25 +92,28 @@ export const Modal: FC = () => {
     setOpen(false)
   }
 
-  const handleChangeAccount = (event: ChangeEvent<HTMLInputElement>) => {
-    setAccount(event.target.value)
-  }
-
-  const handleChangeAmount = (event: ChangeEvent<HTMLInputElement>) => {
-    setAmount(event.target.value)
-  }
-
-  const handleChangeCategory = (event: ChangeEvent<HTMLInputElement>) => {
-    setCategory(event.target.value)
-  }
-
-  const handleChangeDesc = (event: ChangeEvent<HTMLInputElement>) => {
-    setDesc(event.target.value)
+  const handleChangeField = (event: ChangeEvent<HTMLInputElement>) => {
+    switch (event.target.name) {
+      case 'amount':
+        setAmount(event.target.value)
+        break
+      case 'account':
+        setAccount(event.target.value)
+        break
+      case 'category':
+        setCategory(event.target.value)
+        break
+      case 'desc':
+        setDesc(event.target.value)
+        break
+      default:
+        break
+    }
   }
 
   const handleAddNote = async () => {
-    const [_account] = data.accounts.filter(acc => acc._id === account)
-    const [_category] = categoriesData.categories.filter(categry => categry._id === +category)
+    const [_account] = accounts.accounts.filter(acc => acc._id === account)
+    const [_category] = categories.categories.filter(categry => categry._id === +category)
 
     const note = {
       type,
@@ -114,48 +121,21 @@ export const Modal: FC = () => {
       account: _account,
       category: _category,
       desc,
-      createAt: selectedDate.toISOString(),
+      createAt: getDateTime(date).toISOString(),
     }
 
-    createNote({ variables: { input: note } })
-
-    updateAccount({
-      variables: {
-        id: _account._id,
-        amount: +amount,
-        type,
-      },
-      refetchQueries: [
-        {
-          query: AccountsDocument,
-          variables: { visible: true },
-        },
-      ],
-    })
+    createNote(note)
 
     setOpen(false)
   }
 
-  if (loading) {
-    return (
-      <>
-        <Skeleton className={classes.sceleton} variant="rect" width="100%" height={20} />
-        <Skeleton className={classes.sceleton} variant="rect" width="100%" height={40} />
-        <Skeleton className={classes.sceleton} variant="rect" width="100%" height={100} />
-      </>
-    )
-  }
-
-  const { accounts } = data
-
   return (
     <>
-      <DateBar changeDate={handleDateChange} currentDate={selectedDate} />
       <ButtonGroup color="primary" className={classes.group}>
-        <Button onClick={() => handleClickOpen(1)} disabled={selectedDate > new Date()}>
+        <Button onClick={() => handleClickOpen(1)} disabled={date > new Date()}>
           Доход
         </Button>
-        <Button onClick={() => handleClickOpen(0)} disabled={selectedDate > new Date()}>
+        <Button onClick={() => handleClickOpen(0)} disabled={date > new Date()}>
           Рассход
         </Button>
       </ButtonGroup>
@@ -166,7 +146,8 @@ export const Modal: FC = () => {
             className={classes.textField}
             label="Сумма"
             value={amount}
-            onChange={handleChangeAmount}
+            name="amount"
+            onChange={handleChangeField}
             fullWidth
             inputProps={{ inputMode: 'numeric' }}
           />
@@ -174,51 +155,60 @@ export const Modal: FC = () => {
             className={classes.textField}
             select
             label="Счет"
+            name="account"
             value={account}
-            onChange={handleChangeAccount}
+            onChange={handleChangeField}
             fullWidth
           >
-            {accounts.map(
-              option =>
-                option.visible && (
-                  <MenuItem key={option._id} value={option._id}>
-                    <Box className={classes.menuItem}>
-                      <Icon icon={option.iconID} />
-                      <Typography>{option.name}</Typography>
-                      <Box className={classes.amount}>
-                        <Amount value={option.amount} currency={option.currency.icon} />
+            {accounts &&
+              accounts.accounts.map(
+                option =>
+                  option.visible && (
+                    <MenuItem key={option._id} value={option._id}>
+                      <Box className={classes.menuItem}>
+                        <Icon icon={option.iconID} className={classes.icon} />
+                        <Typography>{option.name}</Typography>
+                        <Box className={classes.amount}>
+                          <Amount value={option.amount} currency={option.currency.icon} />
+                        </Box>
                       </Box>
-                    </Box>
-                  </MenuItem>
-                ),
-            )}
+                    </MenuItem>
+                  ),
+              )}
           </TextField>
           <TextField
             className={classes.textField}
             select
             label="Категория"
+            name="category"
             value={category}
-            onChange={handleChangeCategory}
+            onChange={handleChangeField}
             fullWidth
           >
-            {categoriesData ? (
-              categoriesData.categories.map(option => (
+            {categories ? (
+              categories.categories.map(option => (
                 <MenuItem key={option._id} value={option._id}>
                   <Box className={classes.menuItem}>
-                    <Icon icon={option._id} />
+                    <Icon icon={option._id} className={classes.icon} />
                     {option.name}
                   </Box>
                 </MenuItem>
               ))
             ) : (
-              <Skeleton className={classes.sceleton} variant="rect" width="100%" height={20} />
+              <>
+                <Skeleton className={classes.sceleton} variant="rect" width="100%" height={40} />
+                <Skeleton className={classes.sceleton} variant="rect" width="100%" height={40} />
+                <Skeleton className={classes.sceleton} variant="rect" width="100%" height={40} />
+                <Skeleton className={classes.sceleton} variant="rect" width="100%" height={40} />
+              </>
             )}
           </TextField>
           <TextField
             className={classes.textField}
             value={desc}
-            onChange={handleChangeDesc}
+            onChange={handleChangeField}
             label="Описание"
+            name="desc"
             fullWidth
           />
         </DialogContent>

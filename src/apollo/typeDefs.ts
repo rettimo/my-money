@@ -29,6 +29,7 @@ export const typeDefs = gql`
   }
 
   type Note {
+    _id: ID!
     type: Int!
     amount: Int!
     account: Account!

@@ -1,0 +1,19 @@
+query notes($date: Date!) {
+  notes(date: $date) {
+    _id
+    type
+    amount
+    createAt
+    account {
+      name
+      currency {
+        icon
+      }
+    }
+    category {
+      name
+      _id
+    }
+    desc
+  }
+}

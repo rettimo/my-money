@@ -1,5 +1,4 @@
 import { Schema, model, models } from 'mongoose'
-import { AccountModel } from 'interfaces'
 
 const CurrencyIDSchema = new Schema({
   _id: {
@@ -35,4 +34,4 @@ export const AccountSchema = new Schema({
   },
 })
 
-export default models.Account || model<AccountModel>('Account', AccountSchema, 'accounts')
+export default models.Account || model('Account', AccountSchema, 'accounts')

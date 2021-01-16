@@ -1,8 +1,8 @@
 import { FC } from 'react'
+import { IAccountsQuery } from 'generated/graphql'
 
 import { Paper, makeStyles, Typography, Box, Divider } from '@material-ui/core'
 import { Skeleton } from '@material-ui/lab'
-import { useAccountsQuery } from 'generated/graphql'
 import { Amount } from './Amount'
 import { Icon } from './Icon'
 
@@ -24,14 +24,14 @@ const useStyles = makeStyles({
   },
 })
 
-export const Balance: FC = () => {
-  const { data, loading } = useAccountsQuery({ variables: { visible: true } })
-
+export const Balance: FC<{ data: IAccountsQuery; loading: boolean }> = ({ data, loading }) => {
   const classes = useStyles()
 
   if (loading) {
     return (
       <>
+        <Skeleton className={classes.sceleton} variant="rect" width="100%" height={70} />
+        <Skeleton className={classes.sceleton} variant="rect" width="100%" height={70} />
         <Skeleton className={classes.sceleton} variant="rect" width="100%" height={70} />
         <Skeleton className={classes.sceleton} variant="rect" width="100%" height={70} />
       </>

@@ -1,9 +1,8 @@
-/* eslint-disable consistent-return */
-import mongoose from 'mongoose'
+import mongoose, { Mongoose } from 'mongoose'
 
-export const dbConnect = async () => {
+export const dbConnect = async (): Promise<Mongoose | 0> => {
   if (mongoose.connection.readyState >= 1) {
-    return
+    return 0
   }
 
   return mongoose.connect(process.env.MONGODB_URI, {

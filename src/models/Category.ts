@@ -1,5 +1,4 @@
 import { Schema, model, models } from 'mongoose'
-import { CategoryDocument, CategoryModel } from 'interfaces'
 
 export const CategorySchema = new Schema({
   _id: {
@@ -16,5 +15,4 @@ export const CategorySchema = new Schema({
   },
 })
 
-export default models.Category ||
-  model<CategoryDocument, CategoryModel>('Category', CategorySchema, 'categories')
+export default models.Category || model('Category', CategorySchema, 'categories')

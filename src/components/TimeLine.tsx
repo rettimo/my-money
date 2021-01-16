@@ -1,4 +1,6 @@
 import { FC } from 'react'
+import { formatDate } from 'utils/dateHelpers'
+import { INotesQuery } from 'generated/graphql'
 
 import {
   Timeline as MIUTimeLine,
@@ -9,16 +11,13 @@ import {
   TimelineDot,
   TimelineOppositeContent,
 } from '@material-ui/lab'
-import { Typography, Box, makeStyles, Tooltip, Button } from '@material-ui/core'
-import { LocalTaxi } from '@material-ui/icons'
+import { Typography, Box, makeStyles, Button, CircularProgress } from '@material-ui/core'
 import { Amount } from './Amount'
+import { Icon } from './Icon'
 
 const useStyles = makeStyles({
   timeLine: {
     padding: 0,
-  },
-  icon: {
-    transform: 'translate(5px, 6px)',
   },
   content: {
     marginTop: -7,
@@ -31,32 +30,49 @@ const useStyles = makeStyles({
     padding: '25px 0',
     textAlign: 'center',
   },
+  icon: {
+    transform: 'translate(0px, 6px)',
+    marginLeft: 7,
+    display: 'inline-block',
+  },
+  progress: {
+    textAlign: 'center',
+    padding: 25,
+  },
 })
 
-export const TimeLine: FC = () => {
+interface Props {
+  data: INotesQuery
+  loading: boolean
+}
+
+export const TimeLine: FC<Props> = ({ data, loading }) => {
   const classes = useStyles()
 
-  const actions = []
+  if (loading) {
+    return (
+      <Box className={classes.progress}>
+        <CircularProgress />
+      </Box>
+    )
+  }
 
-  if (actions.length === 0) {
+  const { notes } = data
+
+  if (notes.length === 0) {
     return <Typography className={classes.notFound}>Записей не найдено</Typography>
   }
 
   return (
     <>
       <MIUTimeLine align="alternate" className={classes.timeLine}>
-        {actions.map(i => (
-          <TimelineItem key={i.id}>
+        {notes.map(note => (
+          <TimelineItem key={note._id}>
             <TimelineOppositeContent>
-              <Typography color="textSecondary">{i.createAt}</Typography>
+              <Typography color="textSecondary">{formatDate(note.createAt)}</Typography>
             </TimelineOppositeContent>
             <TimelineSeparator>
-              <Button
-                className={classes.dot}
-                onClick={() => {
-                  console.log(i.id)
-                }}
-              >
+              <Button className={classes.dot}>
                 <TimelineDot />
               </Button>
               <TimelineConnector />
@@ -64,14 +80,18 @@ export const TimeLine: FC = () => {
             <TimelineContent className={classes.content}>
               <Box>
                 <Typography>
-                  <Amount value={i.amount} />
-                  <Tooltip title="Такси" placement="top">
-                    <LocalTaxi className={classes.icon} color="primary" />
-                  </Tooltip>
+                  <Amount
+                    value={note.type ? note.amount : -note.amount}
+                    currency={note.account.currency.icon}
+                  />
+                  <Box component="span" className={classes.icon}>
+                    <Icon icon={note.category._id} />
+                  </Box>
                 </Typography>
               </Box>
+              <Box>{note.account.name}</Box>
               <Typography variant="caption" color="textSecondary">
-                {i.desc}
+                {note.desc}
               </Typography>
             </TimelineContent>
           </TimelineItem>

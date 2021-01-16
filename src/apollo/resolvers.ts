@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import Account from 'models/Account'
 import { dbConnect } from 'utils/dbConnect'
 import { IResolvers } from 'generated/graphql'
-import Category from 'models/Category'
 import { GraphQLScalarType, Kind } from 'graphql'
+
 import Note from 'models/Note'
-import mongoose from 'mongoose'
+import Category from 'models/Category'
+import Account from 'models/Account'
+import { dateFromTo } from 'utils/dateHelpers'
 
 export const resolvers: IResolvers = {
   Date: new GraphQLScalarType({
@@ -44,6 +45,20 @@ export const resolvers: IResolvers = {
 
       return catgs
     },
+    notes: async (_: unknown, { date }: { date: Date }) => {
+      await dbConnect()
+
+      const { from, to } = dateFromTo(date)
+
+      const _notes = await Note.find({
+        createAt: {
+          $gte: from,
+          $lt: to,
+        },
+      }).sort({ createAt: -1 })
+
+      return _notes
+    },
   },
   Mutation: {
     note: async (_: unknown, { input }) => {
@@ -57,12 +72,12 @@ export const resolvers: IResolvers = {
       await dbConnect()
 
       if (type === 0) {
-        await Account.findByIdAndUpdate({ _id }, { $inc: { amount: -amount } })
+        await Account.findByIdAndUpdate({ _id }, { $inc: { amount: -amount as never } })
         const acc = Account.findById({ _id })
         return acc
       }
 
-      await Account.findByIdAndUpdate({ _id }, { $inc: { amount } })
+      await Account.findByIdAndUpdate({ _id }, { $inc: { amount: amount as never } })
       const acc = Account.findById({ _id })
       return acc
     },
