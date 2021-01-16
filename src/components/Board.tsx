@@ -1,5 +1,7 @@
 import { FC, useState } from 'react'
 import {
+  AccountsDocument,
+  NotesDocument,
   useAccountAcountMutation,
   useAccountsQuery,
   useCategoriesLazyQuery,
@@ -37,23 +39,30 @@ export const Board: FC = () => {
 
   //* ------------------------ Methods -------------------------
   //* Change date
-  const handleDateChange = date => {
+  const handleDateChange = (date: Date) => {
     setSelectedDate(date)
     refetchNotes({ date })
   }
 
   //* Create Note
   const hanldeCreateNote = note => {
-    createNote({ variables: { input: note } })
+    createNote({
+      variables: { input: note },
+      refetchQueries: [
+        {
+          query: NotesDocument,
+          variables: { date: selectedDate },
+        },
+      ],
+    })
     updateAccount({
       variables: {
         id: note.account._id,
         amount: note.amount,
         type: note.type,
       },
+      refetchQueries: [{ query: AccountsDocument, variables: { visible: true } }],
     })
-    refetchAcc({ visible: true })
-    refetchNotes({ date: selectedDate })
   }
 
   return (
